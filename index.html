@@ -4,7 +4,7 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <!-- <link rel="stylesheet" href="style.css"> -->
+        <link rel="stylesheet" href="style.css">
         <title>Chat Application</title>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/@deepgram/sdk"></script>
@@ -80,7 +80,7 @@
                         $("div p").last().html(innerHTML)
                         // call ajax
                         $.ajax({
-                            url: 'http://127.0.0.1:8000/datagram/text_to_text/',
+                            url: 'https://quickagentbe2.onrender.com/datagram/text_to_text/',
                             type: "POST",
                             data : {transcript : transcript},
                             success: function (data) {
@@ -94,8 +94,13 @@
 
                                 speakText(msg)
                                 function greeting() {
+                                    if (transcript==='bye' || transcript==='goodbye' ||transcript==='good bye'){
+                                    mediaRecorder.stop()
+                                    }
+                                    else{
                                     mediaRecorder.resume()
                                     $("#chatMessage").append("<p>Loading...</p>")
+                                    }
                                 }
 
 
