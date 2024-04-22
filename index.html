@@ -1,10 +1,126 @@
 <!DOCTYPE html>
+
 <html>
-<body>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <!-- <link rel="stylesheet" href="style.css"> -->
+        <title>Chat Application</title>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@deepgram/sdk"></script>
+        <script src="https://unpkg.com/@deepgram/sdk"></script>
+    </head>
 
-<h1>My First Heading</h1>
+    <body>
+        <header>
+            <h1>Live Chat Room</h1>
+          </header>
+        <!-- <script src="key.js"></script> -->
+        <div class="container">
+            <div class="chat-window">
+              <div class="chat-area">
+                <div id="chatBox" class="chatBox">
+                  <!-- Chat Messages -->
+                  <div id="chatMessage" class="chatMessage">
+                    <p>Loading...</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+        </div>
+        <!-- <script type="module">
+            import { createClient } from 'https://cdn.jsdelivr.net/npm/@deepgram/sdk/+esm';
+            const deepgram = createClient('00c545622f4d5cf9d433f792d51fc0b8965a4c99');
+          
+            console.log('Deepgram Instance: ', deepgram);
 
-<p>My first paragraph.</p>
+        </script> -->
 
-</body>
+        <script>
+            // get audio start
+            // get audio end
+            navigator.mediaDevices.getUserMedia( {audio: true}).then((stream) => {
+                const mediaRecorder  = new MediaRecorder(stream, {MimeType: 'audio/webm'})
+                // const socket = new WebSocket('wss://api.deepgram.com/v1/listen', ['token', '00c545622f4d5cf9d433f792d51fc0b8965a4c99'] )
+
+                const socket = new WebSocket('wss://api.deepgram.com/v1/listen', ['token', '8d1afa83d1fe2af1b980de663e9f2583ffdd1314'] )
+                socket.onopen = () =>{
+                    mediaRecorder.addEventListener('dataavailable', event => {
+                        if (event.data.size > 0 && socket.readyState == 1) {
+                        socket.send(event.data)
+                    }
+                    })
+                    console.log(mediaRecorder)
+                    if (mediaRecorder['state']!='recording'){
+                        mediaRecorder.start(200)
+                    }
+                    
+                }
+                
+                // socket.onclose = () =>{
+                //     console.log("close connection!")
+                // }                
+
+                socket.onmessage = (message) =>{
+                    const received = JSON.parse(message.data)
+                    console.log(received['channel'])
+                    if (received['channel']!=undefined && received['channel']['alternatives'][0]['transcript']!=''){
+                        const transcript = received.channel.alternatives[0].transcript
+
+                    mediaRecorder.pause()
+
+                    console.log(mediaRecorder['state'])
+                    
+                    //display this transcript on web page
+                    
+                    var innerHTML = 'Human:' + transcript
+                    
+                    // if length of transcript is greater then 0
+                    if (transcript.length>0){
+                        $("div p").last().html(innerHTML)
+                        // call ajax
+                        $.ajax({
+                            url: 'http://127.0.0.1:8000/datagram/text_to_text/',
+                            type: "POST",
+                            data : {transcript : transcript},
+                            success: function (data) {
+                                let x = "<p>" + 'Bot:' + data['res'] + "</p>"
+                                console.log(x);
+                                $("#chatMessage").append(x)
+                                var msg = new SpeechSynthesisUtterance(data['res']);
+                                async function speakText(msg){
+                                speechSynthesis.speak(msg)
+                                }
+
+                                speakText(msg)
+                                function greeting() {
+                                    mediaRecorder.resume()
+                                    $("#chatMessage").append("<p>Loading...</p>")
+                                }
+
+
+                                setTimeout(greeting, 5000);
+                                
+                                // mediaRecorder.resume()
+                            },
+                            error: function (error) {
+                                let display_message = "<p>" + error['display_message'] + "</p>"
+                                $("#chatMessage").append(display_message)
+                                $("#chatMessage").append("<p>Loading...</p>")
+                            }
+                        });
+                        
+                    }
+                    }
+                    else{
+                        console.log("No voice found")
+                    }
+                    
+                    
+                }
+
+                //
+            })
+        </script>
+    </body>
 </html>
