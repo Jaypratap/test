@@ -39,11 +39,14 @@
         <script>
             // get audio start
             // get audio end
+            console.log("start")
             navigator.mediaDevices.getUserMedia( {audio: true}).then((stream) => {
                 const mediaRecorder  = new MediaRecorder(stream, {MimeType: 'audio/webm'})
+
+                console.log("load js code")
                 // const socket = new WebSocket('wss://api.deepgram.com/v1/listen', ['token', '00c545622f4d5cf9d433f792d51fc0b8965a4c99'] )
 
-                const socket = new WebSocket('wss://api.deepgram.com/v1/listen', ['token', '8d1afa83d1fe2af1b980de663e9f2583ffdd1314'] )
+                const socket = new WebSocket('wss://api.deepgram.com/v1/listen', ['token', 'f75d4fdd2f6d1efc4d24c838592badca69d93242'] )
                 socket.onopen = () =>{
                     mediaRecorder.addEventListener('dataavailable', event => {
                         if (event.data.size > 0 && socket.readyState == 1) {
@@ -52,7 +55,7 @@
                     })
                     console.log(mediaRecorder)
                     if (mediaRecorder['state']!='recording'){
-                        mediaRecorder.start(200)
+                        mediaRecorder.start(2)
                     }
                     
                 }
@@ -87,24 +90,50 @@
                                 let x = "<p>" + 'Bot:' + data['res'] + "</p>"
                                 console.log(x);
                                 $("#chatMessage").append(x)
-                                var msg = new SpeechSynthesisUtterance(data['res']);
-                                async function speakText(msg){
-                                speechSynthesis.speak(msg)
+                                
+                                
+
+                                
+                                async function greeting() {
+                                    // var msg = new SpeechSynthesisUtterance(data['res']);
+                                    
+                                    // async function speakText(msg){
+                                    //     speechSynthesis.speak(msg)
+                                    //     }
+                                    // const sp = await speakText(msg)
+
+                                    var ssu = new SpeechSynthesisUtterance(data['res']);
+                                    window.speechSynthesis.speak( ssu );
+                                    
+                                    function _wait() {
+                                        if ( ! window.speechSynthesis.speaking ) {
+                                            
+                                            if (transcript==='bye' || transcript==='goodbye' ||transcript==='good bye'){
+                                                mediaRecorder.stop()
+                                                }
+                                            else
+                                                {
+                                                mediaRecorder.resume()
+                                                $("#chatMessage").append("<p>Loading...</p>")
+                                                }
+
+                                        return;
+                                        }
+                                    window.setTimeout( _wait, 10);
+                                    }
+                                    _wait();
+
+
+                                    // speechSynthesis.speak(msg)
+
+                                    
+                                    
                                 }
 
-                                speakText(msg)
-                                function greeting() {
-                                    if (transcript==='bye' || transcript==='goodbye' ||transcript==='good bye'){
-                                    mediaRecorder.stop()
-                                    }
-                                    else{
-                                    mediaRecorder.resume()
-                                    $("#chatMessage").append("<p>Loading...</p>")
-                                    }
-                                }
 
+                                setTimeout(greeting, 2);
 
-                                setTimeout(greeting, 5000);
+                                
                                 
                                 // mediaRecorder.resume()
                             },
