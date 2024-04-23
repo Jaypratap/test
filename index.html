@@ -55,7 +55,7 @@
                     })
                     console.log(mediaRecorder)
                     if (mediaRecorder['state']!='recording'){
-                        mediaRecorder.start(2)
+                        mediaRecorder.start()
                     }
                     
                 }
@@ -70,7 +70,7 @@
                     if (received['channel']!=undefined && received['channel']['alternatives'][0]['transcript']!=''){
                         const transcript = received.channel.alternatives[0].transcript
 
-                    mediaRecorder.pause()
+                    
 
                     console.log(mediaRecorder['state'])
                     
@@ -80,6 +80,7 @@
                     
                     // if length of transcript is greater then 0
                     if (transcript.length>0){
+                        mediaRecorder.pause()
                         $("div p").last().html(innerHTML)
                         // call ajax
                         $.ajax({
@@ -119,7 +120,7 @@
 
                                         return;
                                         }
-                                    window.setTimeout( _wait, 10);
+                                    window.setTimeout( _wait, 5);
                                     }
                                     _wait();
 
@@ -131,7 +132,7 @@
                                 }
 
 
-                                setTimeout(greeting, 2);
+                                setTimeout(greeting, 1);
 
                                 
                                 
@@ -141,6 +142,7 @@
                                 let display_message = "<p>" + error['display_message'] + "</p>"
                                 $("#chatMessage").append(display_message)
                                 $("#chatMessage").append("<p>Loading...</p>")
+                                mediaRecorder.resume()
                             }
                         });
                         
